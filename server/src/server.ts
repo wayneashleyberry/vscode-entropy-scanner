@@ -178,6 +178,32 @@ async function validateTextDocument(textDocument: TextDocument): Promise<void> {
     diagnostics.push(diagnostic);
   }
 
+  // const findings = scanner.findEntropy(text);
+
+  //   findings.forEach((finding) => {
+  //     if (!activeEditor) {
+  //       return;
+  //     }
+
+  //     const ts = new Date();
+  //     const filename = activeEditor.document.fileName;
+
+  //     channel.appendLine(
+  //       `${ts} Found high entropy string ${filename}:${finding}`
+  //     );
+
+  //     const match = text.indexOf(finding);
+  //     const startPos = activeEditor.document.positionAt(match);
+  //     const endPos = activeEditor.document.positionAt(match + finding.length);
+
+  //     const decoration = {
+  //       range: new vscode.Range(startPos, endPos),
+  //       hoverMessage: "This string has a high entropy.",
+  //     };
+
+  //     rangesToDecorate.push(decoration);
+  //   });
+
   // Send the computed diagnostics to VSCode.
   connection.sendDiagnostics({ uri: textDocument.uri, diagnostics });
 }

@@ -1,4 +1,3 @@
-import * as vscode from "vscode";
 import * as charset from "./charset";
 import * as entropy from "./entropy";
 
