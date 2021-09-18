@@ -6,6 +6,6 @@
 <h3>Entropy Scanner</h3>
 </center>
 
-Entropy Scanner provides a language server for Visual Studio Code which detects high entropy strings. High entropy strings may contain passwords, authentication tokens or private keys and should not be committed into version control.
+> Entropy Scanner provides a language server and Visual Studio Code extension which detects high entropy strings.
 
-This extension provides real time insight into high entropy strings, but you should still run pre-commit checks and scan code during continuous integration.
+High entropy strings may contain passwords, authentication tokens or private keys and should not be committed into version control. This extension provides real time insight into high entropy strings. You should still run pre-commit checks and scan code during continuous integration using another tool like [tartufo](https://github.com/godaddy/tartufo).
