@@ -4,6 +4,7 @@
   "description": "Highlight strings with high entropy",
   "author": "Wayne Ashley Berry",
   "license": "MIT",
+  "publisher": "wayneashleyberry",
   "version": "1.0.0",
   "repository": {
     "type": "git",
