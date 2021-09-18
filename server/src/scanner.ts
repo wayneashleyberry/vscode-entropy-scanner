@@ -3,10 +3,15 @@ import * as entropy from "./entropy";
 
 const defaultThreshold = 20;
 
-export function findEntropy(text: string): Array<string> {
+interface Finding {
+  text: string;
+  reason: string;
+}
+
+export function findEntropy(text: string): Array<Finding> {
   const lines = text.split("\n");
 
-  let results: Array<string> = [];
+  let results: Array<Finding> = [];
 
   lines.forEach((line) => {
     const words = line.split(" ");
@@ -21,7 +26,7 @@ export function findEntropy(text: string): Array<string> {
       base64strings.forEach((bs) => {
         const b64entropy = entropy.shannon(bs, charset.base64);
         if (b64entropy > 4.5) {
-          results.push(bs);
+          results.push({ text: bs, reason: "base64" });
         }
       });
 
@@ -31,7 +36,7 @@ export function findEntropy(text: string): Array<string> {
         const hexEntropy = entropy.shannon(hs, charset.hex);
 
         if (hexEntropy > 3) {
-          results.push(hs);
+          results.push({ text: hs, reason: "hex" });
         }
       });
     });

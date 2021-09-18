@@ -19,6 +19,8 @@ import {
 
 import { TextDocument } from "vscode-languageserver-textdocument";
 
+import * as scanner from "./scanner";
+
 // Create a connection for the server, using Node's IPC as a transport.
 // Also include all preview / proposed LSP features.
 const connection = createConnection(ProposedFeatures.all);
@@ -136,27 +138,25 @@ documents.onDidChangeContent((change) => {
 });
 
 async function validateTextDocument(textDocument: TextDocument): Promise<void> {
-  // In this simple example we get the settings for every validate run.
-  const settings = await getDocumentSettings(textDocument.uri);
-
-  // The validator creates diagnostics for all uppercase words length 2 and more
   const text = textDocument.getText();
-  const pattern = /\b[A-Z]{2,}\b/g;
-  let m: RegExpExecArray | null;
 
-  let problems = 0;
   const diagnostics: Diagnostic[] = [];
-  while ((m = pattern.exec(text)) && problems < settings.maxNumberOfProblems) {
-    problems++;
+
+  const findings = scanner.findEntropy(text);
+
+  findings.forEach((finding) => {
+    const m = text.indexOf(finding.text);
+
     const diagnostic: Diagnostic = {
       severity: DiagnosticSeverity.Warning,
       range: {
-        start: textDocument.positionAt(m.index),
-        end: textDocument.positionAt(m.index + m[0].length),
+        start: textDocument.positionAt(m),
+        end: textDocument.positionAt(m + finding.text.length),
       },
-      message: `${m[0]} is all uppercase.`,
-      source: "ex",
+      message: `String has a high entropy.`,
+      source: finding.reason,
     };
+
     if (hasDiagnosticRelatedInformationCapability) {
       diagnostic.relatedInformation = [
         {
@@ -164,45 +164,13 @@ async function validateTextDocument(textDocument: TextDocument): Promise<void> {
             uri: textDocument.uri,
             range: Object.assign({}, diagnostic.range),
           },
-          message: "Spelling matters",
-        },
-        {
-          location: {
-            uri: textDocument.uri,
-            range: Object.assign({}, diagnostic.range),
-          },
-          message: "Particularly for names",
+          message: finding.text,
         },
       ];
     }
+
     diagnostics.push(diagnostic);
-  }
-
-  // const findings = scanner.findEntropy(text);
-
-  //   findings.forEach((finding) => {
-  //     if (!activeEditor) {
-  //       return;
-  //     }
-
-  //     const ts = new Date();
-  //     const filename = activeEditor.document.fileName;
-
-  //     channel.appendLine(
-  //       `${ts} Found high entropy string ${filename}:${finding}`
-  //     );
-
-  //     const match = text.indexOf(finding);
-  //     const startPos = activeEditor.document.positionAt(match);
-  //     const endPos = activeEditor.document.positionAt(match + finding.length);
-
-  //     const decoration = {
-  //       range: new vscode.Range(startPos, endPos),
-  //       hoverMessage: "This string has a high entropy.",
-  //     };
-
-  //     rangesToDecorate.push(decoration);
-  //   });
+  });
 
   // Send the computed diagnostics to VSCode.
   connection.sendDiagnostics({ uri: textDocument.uri, diagnostics });
