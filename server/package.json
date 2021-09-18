@@ -1,15 +1,15 @@
 {
-  "name": "lsp-sample-server",
-  "description": "Example implementation of a language server in node.",
+  "name": "entropy-scanner-server",
+  "description": "Entropy scanner language server.",
   "version": "1.0.0",
-  "author": "Microsoft Corporation",
+  "author": "Wayne Ashley Berry",
   "license": "MIT",
   "engines": {
     "node": "*"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/Microsoft/vscode-extension-samples"
+    "url": "https://github.com/wayneashleyberry/vscode-entropy-scanner"
   },
   "dependencies": {
     "vscode-languageserver": "^7.0.0",

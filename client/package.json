@@ -1,13 +1,12 @@
 {
-  "name": "lsp-sample-client",
-  "description": "VSCode part of a language server",
-  "author": "Microsoft Corporation",
-  "license": "MIT",
-  "version": "0.0.1",
+  "name": "entropy-scanner-client",
+  "description": "Entropy scanner client",
+  "author": "Wayne Ashley Berry",
+  "version": "1.0.0",
   "publisher": "vscode",
   "repository": {
     "type": "git",
-    "url": "https://github.com/Microsoft/vscode-extension-samples"
+    "url": "https://github.com/wayneashleyberry/vscode-entropy-scanner"
   },
   "engines": {
     "vscode": "^1.52.0"

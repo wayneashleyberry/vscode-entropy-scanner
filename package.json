@@ -1,16 +1,24 @@
 {
-  "name": "lsp-sample",
-  "description": "A language server example",
-  "author": "Microsoft Corporation",
+  "name": "entropy-scanner",
+  "displayName": "Entropy Scanner",
+  "description": "Highlight strings with high entropy",
+  "author": "Wayne Ashley Berry",
   "license": "MIT",
   "version": "1.0.0",
   "repository": {
     "type": "git",
-    "url": "https://github.com/Microsoft/vscode-extension-samples"
+    "url": "https://github.com/wayneashleyberry/vscode-entropy-scanner"
   },
-  "publisher": "vscode-samples",
-  "categories": [],
+  "categories": [
+    "Linters",
+    "Other"
+  ],
   "keywords": [
+    "linter",
+    "entropy",
+    "secret",
+    "scanner",
+    "security",
     "multi-root ready"
   ],
   "engines": {
@@ -20,31 +28,6 @@
     "*"
   ],
   "main": "./client/out/extension",
-  "contributes": {
-    "configuration": {
-      "type": "object",
-      "title": "Example configuration",
-      "properties": {
-        "languageServerExample.maxNumberOfProblems": {
-          "scope": "resource",
-          "type": "number",
-          "default": 100,
-          "description": "Controls the maximum number of problems produced by the server."
-        },
-        "languageServerExample.trace.server": {
-          "scope": "window",
-          "type": "string",
-          "enum": [
-            "off",
-            "messages",
-            "verbose"
-          ],
-          "default": "off",
-          "description": "Traces the communication between VS Code and the language server."
-        }
-      }
-    }
-  },
   "scripts": {
     "vscode:prepublish": "npm run compile",
     "compile": "tsc -b",
