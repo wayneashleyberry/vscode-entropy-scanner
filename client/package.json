@@ -1,0 +1,21 @@
+{
+  "name": "entropy-scanner-client",
+  "description": "Entropy scanner client",
+  "author": "Wayne Ashley Berry",
+  "version": "1.0.0",
+  "publisher": "vscode",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/wayneashleyberry/vscode-entropy-scanner"
+  },
+  "engines": {
+    "vscode": "^1.52.0"
+  },
+  "dependencies": {
+    "vscode-languageclient": "^7.0.0"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.52.0",
+    "@vscode/test-electron": "^1.6.1"
+  }
+}

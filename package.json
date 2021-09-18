@@ -2,37 +2,44 @@
   "name": "entropy-scanner",
   "displayName": "Entropy Scanner",
   "description": "Highlight strings with high entropy",
+  "author": "Wayne Ashley Berry",
+  "license": "MIT",
   "version": "1.0.0",
-  "engines": {
-    "vscode": "^1.60.0"
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/wayneashleyberry/vscode-entropy-scanner"
   },
   "categories": [
     "Linters",
     "Other"
   ],
+  "keywords": [
+    "linter",
+    "entropy",
+    "secret",
+    "scanner",
+    "security",
+    "multi-root ready"
+  ],
+  "engines": {
+    "vscode": "^1.43.0"
+  },
   "activationEvents": [
     "*"
   ],
-  "main": "./out/extension.js",
+  "main": "./client/out/extension",
   "scripts": {
     "vscode:prepublish": "npm run compile",
-    "compile": "tsc -p ./",
-    "watch": "tsc -watch -p ./",
-    "pretest": "npm run compile && npm run lint",
-    "lint": "eslint src --ext ts",
-    "test": "node ./out/test/runTest.js"
+    "compile": "tsc -b",
+    "watch": "tsc -b -w",
+    "lint": "eslint ./client/src ./server/src --ext .ts,.tsx",
+    "postinstall": "cd client && npm install && cd ../server && npm install && cd .."
   },
   "devDependencies": {
-    "@types/vscode": "^1.60.0",
-    "@types/glob": "^7.1.3",
-    "@types/mocha": "^8.2.2",
-    "@types/node": "14.x",
-    "eslint": "^7.27.0",
-    "@typescript-eslint/eslint-plugin": "^4.26.0",
-    "@typescript-eslint/parser": "^4.26.0",
-    "glob": "^7.1.7",
-    "mocha": "^8.4.0",
-    "typescript": "^4.3.2",
-    "vscode-test": "^1.5.2"
+    "@types/node": "^12.12.0",
+    "@typescript-eslint/eslint-plugin": "^4.31.1",
+    "@typescript-eslint/parser": "^4.31.1",
+    "eslint": "^7.32.0",
+    "typescript": "^4.4.3"
   }
 }

@@ -2,4 +2,4 @@
 <h3>Entropy Scanner</h3>
 </center>
 
-Entropy Scanner is a Visual Studio Code extension that highlights strings with a high entropy value. These strings may contain passwords, auth tokens and other private data which may be a security risk.
+Entropy Scanner provides a language server for Visual Studio Code which detects high entropy strings. High entropy strings may contain passwords, authentication tokens or private keys and should not be committed into version control.
