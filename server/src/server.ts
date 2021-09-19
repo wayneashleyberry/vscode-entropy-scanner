@@ -22,6 +22,9 @@ import * as signature from "./signature";
 // Also include all preview / proposed LSP features.
 const connection = createConnection(ProposedFeatures.all);
 
+// The workspace folder this server is operating on
+let workspaceFolder: string | null;
+
 // Create a simple text document manager.
 const documents: TextDocuments<TextDocument> = new TextDocuments(TextDocument);
 
@@ -30,6 +33,8 @@ let hasWorkspaceFolderCapability = false;
 let hasDiagnosticRelatedInformationCapability = false;
 
 connection.onInitialize((params: InitializeParams) => {
+  workspaceFolder = params.rootUri;
+
   const capabilities = params.capabilities;
 
   // Does the client support the `workspace/configuration` request?
@@ -111,9 +116,8 @@ async function validateTextDocument(textDocument: TextDocument): Promise<void> {
         },
       ];
 
-      const filename: string = path.basename(textDocument.uri);
-
-      if (filename !== textDocument.uri) {
+      if (workspaceFolder) {
+        const filename = path.relative(workspaceFolder, textDocument.uri);
         const sig = signature.createSignature(finding.text, filename);
 
         diagnostic.relatedInformation.push({
