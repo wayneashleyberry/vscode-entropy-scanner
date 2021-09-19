@@ -33,7 +33,7 @@ export function findEntropy(text: string): Array<Finding> {
           results.push({
             text: bs,
             reason: "base64",
-            index: index + word.indexOf(bs),
+            index: index + line.indexOf(bs),
           });
         }
       });
@@ -47,15 +47,13 @@ export function findEntropy(text: string): Array<Finding> {
           results.push({
             text: hs,
             reason: "hex",
-            index: index + word.indexOf(hs),
+            index: index + line.indexOf(hs),
           });
         }
       });
-
-      index += word.length;
     });
 
-    index += 1;
+    index += line.length + 1;
   });
 
   return results;
