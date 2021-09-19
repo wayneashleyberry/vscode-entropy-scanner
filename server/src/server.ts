@@ -10,9 +10,13 @@ import {
   InitializeResult,
 } from "vscode-languageserver/node";
 
+import * as path from "path";
+
 import { TextDocument } from "vscode-languageserver-textdocument";
 
 import * as scanner from "./scanner";
+
+import * as signature from "./signature";
 
 // Create a connection for the server, using Node's IPC as a transport.
 // Also include all preview / proposed LSP features.
@@ -103,9 +107,23 @@ async function validateTextDocument(textDocument: TextDocument): Promise<void> {
             uri: textDocument.uri,
             range: Object.assign({}, diagnostic.range),
           },
-          message: finding.text,
+          message: `String: ${finding.text}`,
         },
       ];
+
+      const filename: string = path.basename(textDocument.uri);
+
+      if (filename !== textDocument.uri) {
+        const sig = signature.createSignature(finding.text, filename);
+
+        diagnostic.relatedInformation.push({
+          location: {
+            uri: textDocument.uri,
+            range: Object.assign({}, diagnostic.range),
+          },
+          message: `Signature: ${sig}`,
+        });
+      }
     }
 
     diagnostics.push(diagnostic);
