@@ -6,12 +6,15 @@ const defaultThreshold = 20;
 interface Finding {
   text: string;
   reason: string;
+  index: number;
 }
 
 export function findEntropy(text: string): Array<Finding> {
   const lines = text.split("\n");
 
   let results: Array<Finding> = [];
+
+  let index: number = 0;
 
   lines.forEach((line) => {
     const words = line.split(" ");
@@ -25,8 +28,13 @@ export function findEntropy(text: string): Array<Finding> {
 
       base64strings.forEach((bs) => {
         const b64entropy = entropy.shannon(bs, charset.base64);
+
         if (b64entropy > 4.5) {
-          results.push({ text: bs, reason: "base64" });
+          results.push({
+            text: bs,
+            reason: "base64",
+            index: index + word.indexOf(bs),
+          });
         }
       });
 
@@ -36,10 +44,18 @@ export function findEntropy(text: string): Array<Finding> {
         const hexEntropy = entropy.shannon(hs, charset.hex);
 
         if (hexEntropy > 3) {
-          results.push({ text: hs, reason: "hex" });
+          results.push({
+            text: hs,
+            reason: "hex",
+            index: index + word.indexOf(hs),
+          });
         }
       });
+
+      index += word.length;
     });
+
+    index += 1;
   });
 
   return results;

@@ -86,13 +86,11 @@ async function validateTextDocument(textDocument: TextDocument): Promise<void> {
   const findings = scanner.findEntropy(text);
 
   findings.forEach((finding) => {
-    const m = text.indexOf(finding.text);
-
     const diagnostic: Diagnostic = {
       severity: DiagnosticSeverity.Warning,
       range: {
-        start: textDocument.positionAt(m),
-        end: textDocument.positionAt(m + finding.text.length),
+        start: textDocument.positionAt(finding.index),
+        end: textDocument.positionAt(finding.index + finding.text.length),
       },
       message: `String has a high entropy.`,
       source: finding.reason,
