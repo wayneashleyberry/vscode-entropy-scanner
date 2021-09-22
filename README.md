@@ -1,4 +1,4 @@
-<img width="1435" alt="Screenshot 2021-09-18 at 9 26 12 am" src="https://user-images.githubusercontent.com/727262/133882237-ba2feec1-99d0-4ce6-bfc2-a27fdbc35779.png">
+<img width="978" alt="Screenshot 2021-09-22 at 4 27 01 pm" src="https://user-images.githubusercontent.com/727262/134373577-fce054f6-f2a8-4ef7-984a-0be3ef5a33bf.png">
 
 ---
 
