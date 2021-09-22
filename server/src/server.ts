@@ -1,26 +1,21 @@
+import * as fs from "fs";
+import * as path from "path";
+import * as toml from "toml";
+import * as url from "url";
+import { TextDocument } from "vscode-languageserver-textdocument";
 import {
   createConnection,
-  TextDocuments,
   Diagnostic,
   DiagnosticSeverity,
-  ProposedFeatures,
-  InitializeParams,
   DidChangeConfigurationNotification,
-  TextDocumentSyncKind,
+  InitializeParams,
   InitializeResult,
+  ProposedFeatures,
+  TextDocuments,
+  TextDocumentSyncKind,
 } from "vscode-languageserver/node";
-
-import * as path from "path";
-
-import { TextDocument } from "vscode-languageserver-textdocument";
-
 import * as scanner from "./scanner";
-
 import * as signature from "./signature";
-import * as fs from "fs";
-import * as url from "url";
-import * as toml from "toml";
-import * as util from "util";
 
 // Create a connection for the server, using Node's IPC as a transport.
 // Also include all preview / proposed LSP features.
