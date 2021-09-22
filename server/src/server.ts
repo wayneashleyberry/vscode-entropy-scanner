@@ -1,4 +1,5 @@
 import * as fs from "fs";
+import * as minimatch from "minimatch";
 import * as path from "path";
 import * as toml from "toml";
 import * as url from "url";
@@ -166,21 +167,42 @@ connection.onInitialized(() => {
 // The content of a text document has changed. This event is emitted
 // when the text document first opened or when its content has changed.
 documents.onDidChangeContent((change) => {
-  // Check if this document should be ignored.
-  if (workspaceFolder) {
-    const workspacePath = url.fileURLToPath(workspaceFolder);
+  connection.console.log(
+    new Date() + " content changed: " + change.document.uri
+  );
 
-    const documentPath = url.fileURLToPath(change.document.uri);
+  if (shouldValidateDocument(change.document)) {
+    validateTextDocument(change.document);
+  } else {
+    resetDiagnostics(change.document);
+  }
+});
 
-    const relativePath = path.relative(workspacePath, documentPath);
-
-    connection.console.log(
-      new Date() + " " + "document content changes: " + relativePath
-    );
+function shouldValidateDocument(document: TextDocument): Boolean {
+  if (!workspaceFolder) {
+    return true;
   }
 
-  validateTextDocument(change.document);
-});
+  const workspacePath = url.fileURLToPath(workspaceFolder);
+
+  const documentPath = url.fileURLToPath(document.uri);
+
+  const relativeFilename = path.relative(workspacePath, documentPath);
+
+  let shouldValidate = true;
+
+  excludedPathPatterns.forEach((pattern) => {
+    if (minimatch(relativeFilename, pattern)) {
+      connection.console.log(
+        new Date() + " skipping validation for file: " + relativeFilename
+      );
+
+      shouldValidate = false;
+    }
+  });
+
+  return shouldValidate;
+}
 
 async function validateTextDocument(textDocument: TextDocument): Promise<void> {
   const text = textDocument.getText();
@@ -246,9 +268,18 @@ connection.onDidChangeWatchedFiles((_change) => {
   parseTartufoConfig();
 
   documents.all().forEach((document) => {
-    validateTextDocument(document);
+    if (shouldValidateDocument(document)) {
+      validateTextDocument(document);
+    } else {
+      resetDiagnostics(document);
+    }
   });
 });
+
+function resetDiagnostics(document: TextDocument) {
+  const diagnostics: Diagnostic[] = [];
+  connection.sendDiagnostics({ uri: document.uri, diagnostics });
+}
 
 // Make the text document manager listen on the connection
 // for open, change and close text document events
