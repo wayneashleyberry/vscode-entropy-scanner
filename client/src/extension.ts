@@ -64,21 +64,16 @@ export function activate(context: ExtensionContext) {
   );
 
   context.subscriptions.push(
-    vscode.commands.registerCommand(COMMAND, (signature: string) => {
-      console.log(new Date() + " exclude signature: " + signature);
-    })
+    vscode.commands.registerCommand(
+      EXCLUDE_SIGNATURE_COMMAND,
+      (signature: string) => {
+        console.log(new Date() + " exclude signature: " + signature);
+      }
+    )
   );
 }
 
-const COMMAND = "entropy-scanner.exclude-signature";
-
-export function deactivate(): Thenable<void> | undefined {
-  if (!client) {
-    return undefined;
-  }
-
-  return client.stop();
-}
+const EXCLUDE_SIGNATURE_COMMAND = "entropy-scanner.exclude-signature";
 
 /**
  * Provides code actions corresponding to diagnostic problems.
@@ -130,4 +125,12 @@ export class HighEntropyStringInfo implements vscode.CodeActionProvider {
 
     return action;
   }
+}
+
+export function deactivate(): Thenable<void> | undefined {
+  if (!client) {
+    return undefined;
+  }
+
+  return client.stop();
 }
