@@ -114,7 +114,7 @@ export class HighEntropyStringInfo implements vscode.CodeActionProvider {
     });
 
     action.command = {
-      command: "COMMAND",
+      command: EXCLUDE_SIGNATURE_COMMAND,
       title: "Learn more about emojis",
       tooltip: "This will open the unicode emoji page.",
       arguments: [signature],
