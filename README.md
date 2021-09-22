@@ -9,6 +9,7 @@
 [![Current Version](https://vsmarketplacebadge.apphb.com/version-short/wayneashleyberry.entropy-scanner.svg)](https://marketplace.visualstudio.com/items?itemName=wayneashleyberry.entropy-scanner)
 [![Install Count](https://vsmarketplacebadge.apphb.com/installs-short/wayneashleyberry.entropy-scanner.svg)](https://marketplace.visualstudio.com/items?itemName=wayneashleyberry.entropy-scanner)
 [![Rating](https://vsmarketplacebadge.apphb.com/rating-short/wayneashleyberry.entropy-scanner.svg)](https://marketplace.visualstudio.com/items?itemName=wayneashleyberry.entropy-scanner)
+[![npm](https://github.com/wayneashleyberry/vscode-entropy-scanner/actions/workflows/npm.yml/badge.svg)](https://github.com/wayneashleyberry/vscode-entropy-scanner/actions/workflows/npm.yml)
 
 > Entropy Scanner detects high entropy strings in your code. This extension is implemented as a language server and client for Visual Studio Code.
 
