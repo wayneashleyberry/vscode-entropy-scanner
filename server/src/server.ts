@@ -246,7 +246,7 @@ async function validateTextDocument(textDocument: TextDocument): Promise<void> {
             uri: textDocument.uri,
             range: Object.assign({}, diagnostic.range),
           },
-          message: `Signature: ${findingSignature}`,
+          message: `Tartufo Exclusion Signature: ${findingSignature}`,
         });
       }
     }
