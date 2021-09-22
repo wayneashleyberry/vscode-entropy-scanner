@@ -1,0 +1,26 @@
+name: npm
+on: [pull_request]
+jobs:
+  eslint:
+    name: eslint
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: "14"
+
+      - run: npm i
+      - run: npm run eslint
+
+  prettier:
+    name: prettier
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: "14"
+
+      - run: npm i
+      - run: npm run prettier

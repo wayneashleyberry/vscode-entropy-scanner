@@ -1,21 +1,20 @@
+import * as fs from "fs";
+import * as path from "path";
+import * as toml from "toml";
+import * as url from "url";
+import { TextDocument } from "vscode-languageserver-textdocument";
 import {
   createConnection,
-  TextDocuments,
   Diagnostic,
   DiagnosticSeverity,
-  ProposedFeatures,
-  InitializeParams,
   DidChangeConfigurationNotification,
-  TextDocumentSyncKind,
+  InitializeParams,
   InitializeResult,
+  ProposedFeatures,
+  TextDocuments,
+  TextDocumentSyncKind,
 } from "vscode-languageserver/node";
-
-import * as path from "path";
-
-import { TextDocument } from "vscode-languageserver-textdocument";
-
 import * as scanner from "./scanner";
-
 import * as signature from "./signature";
 
 // Create a connection for the server, using Node's IPC as a transport.
@@ -32,6 +31,8 @@ let hasConfigurationCapability = false;
 let hasWorkspaceFolderCapability = false;
 let hasDiagnosticRelatedInformationCapability = false;
 
+let excludedSignatures: Array<string> = [];
+
 connection.onInitialize((params: InitializeParams) => {
   workspaceFolder = params.rootUri;
 
@@ -42,9 +43,11 @@ connection.onInitialize((params: InitializeParams) => {
   hasConfigurationCapability = !!(
     capabilities.workspace && !!capabilities.workspace.configuration
   );
+
   hasWorkspaceFolderCapability = !!(
     capabilities.workspace && !!capabilities.workspace.workspaceFolders
   );
+
   hasDiagnosticRelatedInformationCapability = !!(
     capabilities.textDocument &&
     capabilities.textDocument.publishDiagnostics &&
@@ -56,6 +59,7 @@ connection.onInitialize((params: InitializeParams) => {
       textDocumentSync: TextDocumentSyncKind.Incremental,
     },
   };
+
   if (hasWorkspaceFolderCapability) {
     result.capabilities.workspace = {
       workspaceFolders: {
@@ -63,8 +67,56 @@ connection.onInitialize((params: InitializeParams) => {
       },
     };
   }
+
+  parseTartufoConfig();
+
   return result;
 });
+
+function parseTartufoConfig() {
+  if (!workspaceFolder) {
+    return;
+  }
+
+  connection.console.log(new Date() + " " + "parsing tartufo config");
+
+  const workspacePath = url.fileURLToPath(workspaceFolder);
+  const tartufoConfigFilename = "tartufo.toml";
+  const tartufoConfigFile = path.join(workspacePath, tartufoConfigFilename);
+
+  let fileContents: string = "";
+
+  try {
+    fileContents = fs.readFileSync(tartufoConfigFile, "utf8");
+  } catch (err: any) {
+    connection.console.error(new Date() + " " + err);
+  }
+
+  if (fileContents === "") {
+    return;
+  }
+
+  const data = toml.parse(fileContents);
+
+  // Parse excluded signatures if they are present in the config.
+  if (
+    data.tool &&
+    data.tool.tartufo &&
+    data.tool.tartufo["exclude-signatures"]
+  ) {
+    const signatures: Array<string> = data.tool.tartufo["exclude-signatures"];
+
+    connection.console.log(new Date() + " " + "clearing excluded signatures");
+
+    excludedSignatures = [];
+
+    signatures.forEach((s) => {
+      connection.console.log(new Date() + " " + "excluding signature: " + s);
+
+      excludedSignatures.push(s);
+    });
+  }
+}
 
 connection.onInitialized(() => {
   if (hasConfigurationCapability) {
@@ -74,9 +126,10 @@ connection.onInitialized(() => {
       undefined
     );
   }
+
   if (hasWorkspaceFolderCapability) {
     connection.workspace.onDidChangeWorkspaceFolders((_event) => {
-      connection.console.log("Workspace folder change event received.");
+      parseTartufoConfig();
     });
   }
 });
@@ -105,6 +158,13 @@ async function validateTextDocument(textDocument: TextDocument): Promise<void> {
       source: finding.reason,
     };
 
+    let findingSignature: string = "";
+
+    if (workspaceFolder) {
+      const filename = path.relative(workspaceFolder, textDocument.uri);
+      findingSignature = signature.createSignature(finding.text, filename);
+    }
+
     if (hasDiagnosticRelatedInformationCapability) {
       diagnostic.relatedInformation = [
         {
@@ -116,21 +176,22 @@ async function validateTextDocument(textDocument: TextDocument): Promise<void> {
         },
       ];
 
-      if (workspaceFolder) {
-        const filename = path.relative(workspaceFolder, textDocument.uri);
-        const sig = signature.createSignature(finding.text, filename);
-
+      if (findingSignature !== "") {
         diagnostic.relatedInformation.push({
           location: {
             uri: textDocument.uri,
             range: Object.assign({}, diagnostic.range),
           },
-          message: `Signature: ${sig}`,
+          message: `Signature: ${findingSignature}`,
         });
       }
     }
 
-    diagnostics.push(diagnostic);
+    const excludeIndex = excludedSignatures.indexOf(findingSignature);
+
+    if (excludeIndex === -1) {
+      diagnostics.push(diagnostic);
+    }
   });
 
   // Send the computed diagnostics to VSCode.
@@ -138,8 +199,13 @@ async function validateTextDocument(textDocument: TextDocument): Promise<void> {
 }
 
 connection.onDidChangeWatchedFiles((_change) => {
-  // Monitored files have change in VSCode
-  connection.console.log("We received an file change event");
+  connection.console.log(new Date() + " " + "watched files have changed");
+
+  parseTartufoConfig();
+
+  documents.all().forEach((document) => {
+    validateTextDocument(document);
+  });
 });
 
 // Make the text document manager listen on the connection
