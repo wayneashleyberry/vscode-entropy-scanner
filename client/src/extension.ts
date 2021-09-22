@@ -32,7 +32,7 @@ export function activate(context: ExtensionContext) {
 
   // Options to control the language client
   const clientOptions: LanguageClientOptions = {
-    documentSelector: [{ scheme: "*", language: "*" }],
+    documentSelector: [{ scheme: "file" }],
     synchronize: {
       // Notify the server about file changes to tartufo.toml contained in the workspace
       fileEvents: workspace.createFileSystemWatcher("**/tartufo.toml"),
