@@ -1,7 +1,7 @@
 {
   "name": "entropy-scanner-server",
   "description": "Entropy scanner language server.",
-  "version": "1.3.1",
+  "version": "1.3.2",
   "author": "Wayne Ashley Berry",
   "license": "MIT",
   "engines": {
