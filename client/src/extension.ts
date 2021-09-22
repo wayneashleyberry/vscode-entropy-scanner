@@ -108,7 +108,10 @@ function excludeSignature(signature: string) {
         data.tool.tartufo[excludeSignaturesKey] = [signature];
       }
 
-      if (data.tool.tartufo[excludeSignaturesKey]) {
+      if (
+        data.tool.tartufo[excludeSignaturesKey] &&
+        data.tool.tartufo[excludeSignaturesKey].indexOf(signature) === -1
+      ) {
         data.tool.tartufo[excludeSignaturesKey].push(signature);
       }
 
