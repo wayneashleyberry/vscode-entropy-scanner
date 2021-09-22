@@ -70,7 +70,7 @@ export function activate(context: ExtensionContext) {
   );
 }
 
-const COMMAND = "code-actions-sample.command";
+const COMMAND = "entropy-scanner.exclude-signature";
 
 export function deactivate(): Thenable<void> | undefined {
   if (!client) {
@@ -119,7 +119,7 @@ export class HighEntropyStringInfo implements vscode.CodeActionProvider {
     });
 
     action.command = {
-      command: COMMAND,
+      command: "COMMAND",
       title: "Learn more about emojis",
       tooltip: "This will open the unicode emoji page.",
       arguments: [signature],
