@@ -17,6 +17,14 @@ import {
 import * as scanner from "./scanner";
 import * as signature from "./signature";
 
+// Tartufo
+const tartufoConfigFilename = "tartufo.toml";
+const tartufoExcludeSignaturesKey = "exclude-signatures";
+const tartufoExcludePathPatternsKey = "exclude-path-patterns";
+
+let excludedSignatures: Array<string> = [];
+let excludedPathPatterns: Array<string> = [];
+
 // Create a connection for the server, using Node's IPC as a transport.
 // Also include all preview / proposed LSP features.
 const connection = createConnection(ProposedFeatures.all);
@@ -30,8 +38,6 @@ const documents: TextDocuments<TextDocument> = new TextDocuments(TextDocument);
 let hasConfigurationCapability = false;
 let hasWorkspaceFolderCapability = false;
 let hasDiagnosticRelatedInformationCapability = false;
-
-let excludedSignatures: Array<string> = [];
 
 connection.onInitialize((params: InitializeParams) => {
   workspaceFolder = params.rootUri;
@@ -81,7 +87,7 @@ function parseTartufoConfig() {
   connection.console.log(new Date() + " " + "parsing tartufo config");
 
   const workspacePath = url.fileURLToPath(workspaceFolder);
-  const tartufoConfigFilename = "tartufo.toml";
+
   const tartufoConfigFile = path.join(workspacePath, tartufoConfigFilename);
 
   let fileContents: string = "";
@@ -102,9 +108,10 @@ function parseTartufoConfig() {
   if (
     data.tool &&
     data.tool.tartufo &&
-    data.tool.tartufo["exclude-signatures"]
+    data.tool.tartufo[tartufoExcludeSignaturesKey]
   ) {
-    const signatures: Array<string> = data.tool.tartufo["exclude-signatures"];
+    const signatures: Array<string> =
+      data.tool.tartufo[tartufoExcludeSignaturesKey];
 
     connection.console.log(new Date() + " " + "clearing excluded signatures");
 
@@ -114,6 +121,28 @@ function parseTartufoConfig() {
       connection.console.log(new Date() + " " + "excluding signature: " + s);
 
       excludedSignatures.push(s);
+    });
+  }
+
+  // Parse excluded path patterns if they are present in the config.
+  if (
+    data.tool &&
+    data.tool.tartufo &&
+    data.tool.tartufo[tartufoExcludePathPatternsKey]
+  ) {
+    const patterns: Array<string> =
+      data.tool.tartufo[tartufoExcludePathPatternsKey];
+
+    connection.console.log(
+      new Date() + " " + "clearing excluded path patterns"
+    );
+
+    excludedPathPatterns = [];
+
+    patterns.forEach((s) => {
+      connection.console.log(new Date() + " " + "excluding path pattern: " + s);
+
+      excludedPathPatterns.push(s);
     });
   }
 }
