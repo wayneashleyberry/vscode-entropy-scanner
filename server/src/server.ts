@@ -220,6 +220,7 @@ async function validateTextDocument(textDocument: TextDocument): Promise<void> {
       },
       message: `String has a high entropy.`,
       source: finding.reason,
+      code: "emoji_mention",
     };
 
     let findingSignature: string = "";
