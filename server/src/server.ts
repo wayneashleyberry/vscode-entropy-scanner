@@ -73,40 +73,55 @@ connection.onInitialize((params: InitializeParams) => {
     };
   }
 
-  if (workspaceFolder) {
-    const workspacePath = url.fileURLToPath(workspaceFolder);
-    const tartufoConfigFilename = "tartufo.toml";
-    const tartufoConfigFile = path.join(workspacePath, tartufoConfigFilename);
-
-    let fileContents: string = "";
-
-    try {
-      fileContents = fs.readFileSync(tartufoConfigFile, "utf8");
-    } catch (err: any) {
-      connection.console.error(err);
-    }
-
-    if (fileContents !== "") {
-      const data = toml.parse(fileContents);
-      if (
-        data.tool &&
-        data.tool.tartufo &&
-        data.tool.tartufo["exclude-signatures"]
-      ) {
-        const signatures: Array<string> =
-          data.tool.tartufo["exclude-signatures"];
-
-        excludedSignatures = [];
-
-        signatures.forEach((s) => {
-          excludedSignatures.push(s);
-        });
-      }
-    }
-  }
+  parseTartufoConfig();
 
   return result;
 });
+
+function parseTartufoConfig() {
+  if (!workspaceFolder) {
+    return;
+  }
+
+  connection.console.log(new Date() + " " + "parsing tartufo config");
+
+  const workspacePath = url.fileURLToPath(workspaceFolder);
+  const tartufoConfigFilename = "tartufo.toml";
+  const tartufoConfigFile = path.join(workspacePath, tartufoConfigFilename);
+
+  let fileContents: string = "";
+
+  try {
+    fileContents = fs.readFileSync(tartufoConfigFile, "utf8");
+  } catch (err: any) {
+    connection.console.error(new Date() + " " + err);
+  }
+
+  if (fileContents === "") {
+    return;
+  }
+
+  const data = toml.parse(fileContents);
+
+  // Parse excluded signatures if they are present in the config.
+  if (
+    data.tool &&
+    data.tool.tartufo &&
+    data.tool.tartufo["exclude-signatures"]
+  ) {
+    const signatures: Array<string> = data.tool.tartufo["exclude-signatures"];
+
+    connection.console.log(new Date() + " " + "clearing excluded signatures");
+
+    excludedSignatures = [];
+
+    signatures.forEach((s) => {
+      connection.console.log(new Date() + " " + "excluding signature: " + s);
+
+      excludedSignatures.push(s);
+    });
+  }
+}
 
 connection.onInitialized(() => {
   if (hasConfigurationCapability) {
@@ -119,7 +134,7 @@ connection.onInitialized(() => {
 
   if (hasWorkspaceFolderCapability) {
     connection.workspace.onDidChangeWorkspaceFolders((_event) => {
-      connection.console.log("Workspace folder change event received.");
+      parseTartufoConfig();
     });
   }
 });
@@ -189,8 +204,13 @@ async function validateTextDocument(textDocument: TextDocument): Promise<void> {
 }
 
 connection.onDidChangeWatchedFiles((_change) => {
-  // Monitored files have change in VSCode
-  connection.console.log("We received an file change event");
+  connection.console.log(new Date() + " " + "watched files have changed");
+
+  parseTartufoConfig();
+
+  documents.all().forEach((document) => {
+    validateTextDocument(document);
+  });
 });
 
 // Make the text document manager listen on the connection
