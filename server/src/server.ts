@@ -166,6 +166,19 @@ connection.onInitialized(() => {
 // The content of a text document has changed. This event is emitted
 // when the text document first opened or when its content has changed.
 documents.onDidChangeContent((change) => {
+  // Check if this document should be ignored.
+  if (workspaceFolder) {
+    const workspacePath = url.fileURLToPath(workspaceFolder);
+
+    const documentPath = url.fileURLToPath(change.document.uri);
+
+    const relativePath = path.relative(workspacePath, documentPath);
+
+    connection.console.log(
+      new Date() + " " + "document content changes: " + relativePath
+    );
+  }
+
   validateTextDocument(change.document);
 });
 
