@@ -1,5 +1,6 @@
 import * as path from "path";
 import * as vscode from "vscode";
+import * as toml from "toml";
 import { ExtensionContext, workspace } from "vscode";
 import {
   LanguageClient,
@@ -7,7 +8,7 @@ import {
   ServerOptions,
   TransportKind,
 } from "vscode-languageclient/node";
-
+import * as TOML from "@iarna/toml";
 let client: LanguageClient;
 
 export function activate(context: ExtensionContext) {
@@ -67,9 +68,66 @@ export function activate(context: ExtensionContext) {
     vscode.commands.registerCommand(
       EXCLUDE_SIGNATURE_COMMAND,
       (signature: string) => {
-        console.log(new Date() + " exclude signature: " + signature);
+        excludeSignature(signature);
       }
     )
+  );
+}
+
+function excludeSignature(signature: string) {
+  console.log(new Date() + " exclude signature: " + signature);
+
+  const configFile = path.join(vscode.workspace.rootPath, "tartufo.toml");
+
+  const setting: vscode.Uri = vscode.Uri.parse(configFile);
+
+  vscode.workspace.openTextDocument(setting).then(
+    (document: vscode.TextDocument) => {
+      const content = document.getText();
+      let data: any = {};
+
+      try {
+        data = toml.parse(content);
+      } catch (error) {
+        console.error("invalid toml");
+        return;
+      }
+
+      if (!data.tool) {
+        data.tool = {};
+      }
+
+      if (!data.tool.tartufo) {
+        data.tool.tartufo = {};
+      }
+
+      if (!data.tool.tartufo["exclude-signatures"]) {
+        data.tool.tartufo["exclude-signature"] = [signature];
+      }
+
+      if (data.tool.tartufo["exclude-signatures"]) {
+        data.tool.tartufo["exclude-signatures"].push(signature);
+      }
+
+      vscode.window.showTextDocument(document, 2, false).then((editor) => {
+        editor.edit((edit) => {
+          const firstLine = editor.document.lineAt(0);
+          const lastLine = editor.document.lineAt(
+            editor.document.lineCount - 1
+          );
+          const textRange = new vscode.Range(
+            firstLine.range.start,
+            lastLine.range.end
+          );
+
+          edit.replace(textRange, TOML.stringify(data));
+        });
+      });
+    },
+    (error: any) => {
+      console.error(error);
+      debugger;
+    }
   );
 }
 
