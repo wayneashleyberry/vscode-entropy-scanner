@@ -1,4 +1,5 @@
 import * as TOML from "@iarna/toml";
+import * as fs from "fs";
 import * as path from "path";
 import * as vscode from "vscode";
 import { ExtensionContext, workspace } from "vscode";
@@ -73,16 +74,19 @@ export function activate(context: ExtensionContext) {
   );
 }
 
+const excludeSignaturesKey = "exclude-signatures";
+
 function excludeSignature(signature: string) {
   console.log(new Date() + " exclude signature: " + signature);
 
-  const configFile = path.join(vscode.workspace.rootPath, "tartufo.toml");
+  const configFilePath = path.join(vscode.workspace.rootPath, "tartufo.toml");
+  const configFileUri: vscode.Uri = vscode.Uri.parse(configFilePath);
 
-  const setting: vscode.Uri = vscode.Uri.parse(configFile);
+  if (!fs.existsSync(configFilePath)) {
+    fs.openSync(configFilePath, "w");
+  }
 
-  // TODO: Create file if it doesnt exist
-
-  vscode.workspace.openTextDocument(setting).then(
+  vscode.workspace.openTextDocument(configFileUri).then(
     (document: vscode.TextDocument) => {
       const content = document.getText();
 
@@ -96,12 +100,16 @@ function excludeSignature(signature: string) {
         data.tool.tartufo = {};
       }
 
-      if (!data.tool.tartufo["exclude-signatures"]) {
-        data.tool.tartufo["exclude-signature"] = [signature];
+      if (!data.tool.tartufo["exclude-path-patterns"]) {
+        data.tool.tartufo["exclude-path-patterns"] = ["tartufo.toml"];
       }
 
-      if (data.tool.tartufo["exclude-signatures"]) {
-        data.tool.tartufo["exclude-signatures"].push(signature);
+      if (!data.tool.tartufo[excludeSignaturesKey]) {
+        data.tool.tartufo[excludeSignaturesKey] = [signature];
+      }
+
+      if (data.tool.tartufo[excludeSignaturesKey]) {
+        data.tool.tartufo[excludeSignaturesKey].push(signature);
       }
 
       vscode.window.showTextDocument(document, 2, false).then((editor) => {
