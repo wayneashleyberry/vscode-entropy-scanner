@@ -17,6 +17,10 @@ import { TextDocument } from "vscode-languageserver-textdocument";
 import * as scanner from "./scanner";
 
 import * as signature from "./signature";
+import * as fs from "fs";
+import * as url from "url";
+import * as toml from "toml";
+import * as util from "util";
 
 // Create a connection for the server, using Node's IPC as a transport.
 // Also include all preview / proposed LSP features.
@@ -32,6 +36,8 @@ let hasConfigurationCapability = false;
 let hasWorkspaceFolderCapability = false;
 let hasDiagnosticRelatedInformationCapability = false;
 
+let excludedSignatures: Array<string> = [];
+
 connection.onInitialize((params: InitializeParams) => {
   workspaceFolder = params.rootUri;
 
@@ -42,9 +48,11 @@ connection.onInitialize((params: InitializeParams) => {
   hasConfigurationCapability = !!(
     capabilities.workspace && !!capabilities.workspace.configuration
   );
+
   hasWorkspaceFolderCapability = !!(
     capabilities.workspace && !!capabilities.workspace.workspaceFolders
   );
+
   hasDiagnosticRelatedInformationCapability = !!(
     capabilities.textDocument &&
     capabilities.textDocument.publishDiagnostics &&
@@ -56,6 +64,7 @@ connection.onInitialize((params: InitializeParams) => {
       textDocumentSync: TextDocumentSyncKind.Incremental,
     },
   };
+
   if (hasWorkspaceFolderCapability) {
     result.capabilities.workspace = {
       workspaceFolders: {
@@ -63,6 +72,39 @@ connection.onInitialize((params: InitializeParams) => {
       },
     };
   }
+
+  if (workspaceFolder) {
+    const workspacePath = url.fileURLToPath(workspaceFolder);
+    const tartufoConfigFilename = "tartufo.toml";
+    const tartufoConfigFile = path.join(workspacePath, tartufoConfigFilename);
+
+    let fileContents: string = "";
+
+    try {
+      fileContents = fs.readFileSync(tartufoConfigFile, "utf8");
+    } catch (err: any) {
+      connection.console.error(err);
+    }
+
+    if (fileContents !== "") {
+      const data = toml.parse(fileContents);
+      if (
+        data.tool &&
+        data.tool.tartufo &&
+        data.tool.tartufo["exclude-signatures"]
+      ) {
+        const signatures: Array<string> =
+          data.tool.tartufo["exclude-signatures"];
+
+        excludedSignatures = [];
+
+        signatures.forEach((s) => {
+          excludedSignatures.push(s);
+        });
+      }
+    }
+  }
+
   return result;
 });
 
@@ -74,6 +116,7 @@ connection.onInitialized(() => {
       undefined
     );
   }
+
   if (hasWorkspaceFolderCapability) {
     connection.workspace.onDidChangeWorkspaceFolders((_event) => {
       connection.console.log("Workspace folder change event received.");
@@ -105,6 +148,13 @@ async function validateTextDocument(textDocument: TextDocument): Promise<void> {
       source: finding.reason,
     };
 
+    let findingSignature: string = "";
+
+    if (workspaceFolder) {
+      const filename = path.relative(workspaceFolder, textDocument.uri);
+      findingSignature = signature.createSignature(finding.text, filename);
+    }
+
     if (hasDiagnosticRelatedInformationCapability) {
       diagnostic.relatedInformation = [
         {
@@ -116,21 +166,22 @@ async function validateTextDocument(textDocument: TextDocument): Promise<void> {
         },
       ];
 
-      if (workspaceFolder) {
-        const filename = path.relative(workspaceFolder, textDocument.uri);
-        const sig = signature.createSignature(finding.text, filename);
-
+      if (findingSignature !== "") {
         diagnostic.relatedInformation.push({
           location: {
             uri: textDocument.uri,
             range: Object.assign({}, diagnostic.range),
           },
-          message: `Signature: ${sig}`,
+          message: `Signature: ${findingSignature}`,
         });
       }
     }
 
-    diagnostics.push(diagnostic);
+    const excludeIndex = excludedSignatures.indexOf(findingSignature);
+
+    if (excludeIndex === -1) {
+      diagnostics.push(diagnostic);
+    }
   });
 
   // Send the computed diagnostics to VSCode.
