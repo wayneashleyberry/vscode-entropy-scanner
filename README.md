@@ -14,3 +14,9 @@
 > Entropy Scanner detects high entropy strings in your code. This extension is implemented as a language server and client for Visual Studio Code.
 
 High entropy strings may contain passwords, authentication tokens or private keys and should not be committed into version control. This extension provides real time insight into high entropy strings. You should still run pre-commit checks and scan code during continuous integration using another tool like [tartufo](https://github.com/godaddy/tartufo).
+
+_Features_
+
+- Highlight high entropy strings using Visual Studio Code diagnostics
+- Considers the `exclude-signatures` and `exclude-path-patterns` options from your `tartufo.toml`
+- Provices quick actions for excluding specific signatures
