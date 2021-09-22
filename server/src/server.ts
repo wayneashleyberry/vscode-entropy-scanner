@@ -97,6 +97,11 @@ function parseTartufoConfig() {
     fileContents = fs.readFileSync(tartufoConfigFile, "utf8");
   } catch (err: any) {
     connection.console.error(new Date() + " " + err);
+
+    excludedPathPatterns = [];
+    excludedSignatures = [];
+
+    return;
   }
 
   if (fileContents === "") {

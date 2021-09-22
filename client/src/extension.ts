@@ -80,6 +80,8 @@ function excludeSignature(signature: string) {
 
   const setting: vscode.Uri = vscode.Uri.parse(configFile);
 
+  // TODO: Create file if it doesnt exist
+
   vscode.workspace.openTextDocument(setting).then(
     (document: vscode.TextDocument) => {
       const content = document.getText();
