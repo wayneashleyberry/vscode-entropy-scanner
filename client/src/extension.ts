@@ -1,6 +1,6 @@
+import * as TOML from "@iarna/toml";
 import * as path from "path";
 import * as vscode from "vscode";
-import * as toml from "toml";
 import { ExtensionContext, workspace } from "vscode";
 import {
   LanguageClient,
@@ -8,7 +8,6 @@ import {
   ServerOptions,
   TransportKind,
 } from "vscode-languageclient/node";
-import * as TOML from "@iarna/toml";
 let client: LanguageClient;
 
 export function activate(context: ExtensionContext) {
@@ -84,14 +83,8 @@ function excludeSignature(signature: string) {
   vscode.workspace.openTextDocument(setting).then(
     (document: vscode.TextDocument) => {
       const content = document.getText();
-      let data: any = {};
 
-      try {
-        data = toml.parse(content);
-      } catch (error) {
-        console.error("invalid toml");
-        return;
-      }
+      const data: any = TOML.parse(content);
 
       if (!data.tool) {
         data.tool = {};

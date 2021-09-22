@@ -1,7 +1,7 @@
+import * as TOML from "@iarna/toml";
 import * as fs from "fs";
 import * as minimatch from "minimatch";
 import * as path from "path";
-import * as toml from "toml";
 import * as url from "url";
 import { TextDocument } from "vscode-languageserver-textdocument";
 import {
@@ -103,7 +103,7 @@ function parseTartufoConfig() {
     return;
   }
 
-  const data = toml.parse(fileContents);
+  const data: any = TOML.parse(fileContents);
 
   // Parse excluded signatures if they are present in the config.
   if (
