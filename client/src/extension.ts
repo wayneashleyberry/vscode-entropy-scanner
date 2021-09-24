@@ -67,8 +67,8 @@ export function activate(context: ExtensionContext) {
   context.subscriptions.push(
     vscode.commands.registerCommand(
       EXCLUDE_SIGNATURE_COMMAND,
-      (signature: string) => {
-        excludeSignature(signature);
+      (signature: string, filename: string) => {
+        excludeSignature(signature, filename);
       }
     )
   );
@@ -76,7 +76,7 @@ export function activate(context: ExtensionContext) {
 
 const excludeSignaturesKey = "exclude-signatures";
 
-function excludeSignature(signature: string) {
+function excludeSignature(signature: string, filename: string) {
   console.log(new Date() + " exclude signature: " + signature);
 
   const configFilePath = path.join(vscode.workspace.rootPath, "tartufo.toml");
@@ -113,6 +113,16 @@ function excludeSignature(signature: string) {
         data.tool.tartufo[excludeSignaturesKey].indexOf(signature) === -1
       ) {
         data.tool.tartufo[excludeSignaturesKey].push(signature);
+      }
+
+      if (!data.tool.tartufo["exclude-signature-reasons"]) {
+        data.tool.tartufo["exclude-signature-reasons"] = {};
+      }
+
+      if (!data.tool.tartufo["exclude-signature-reasons"][signature]) {
+        data.tool.tartufo["exclude-signature-reasons"][
+          signature
+        ] = `${filename}: <Reason for exclusion>`;
       }
 
       vscode.window.showTextDocument(document, 2, false).then((editor) => {
@@ -167,7 +177,6 @@ export class HighEntropyStringInfo implements vscode.CodeActionProvider {
       "Exclude signature from entropy scanner",
       vscode.CodeActionKind.QuickFix
     );
-    const finding: string = document.getText(diagnostic.range);
     let signature: string = "";
 
     diagnostic.relatedInformation.forEach((rel) => {
@@ -177,11 +186,16 @@ export class HighEntropyStringInfo implements vscode.CodeActionProvider {
       }
     });
 
+    const relativeFilename = path.relative(
+      vscode.workspace.rootPath,
+      document.fileName
+    );
+
     action.command = {
       command: EXCLUDE_SIGNATURE_COMMAND,
-      title: "Learn more about emojis",
-      tooltip: "This will open the unicode emoji page.",
-      arguments: [signature],
+      title: "",
+      tooltip: "",
+      arguments: [signature, relativeFilename],
     };
 
     action.diagnostics = [diagnostic];
