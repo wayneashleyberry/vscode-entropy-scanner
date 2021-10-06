@@ -128,6 +128,8 @@ function parseTartufoConfig() {
 
       excludedSignatures.push(s);
     });
+  } else {
+    excludedSignatures = [];
   }
 
   // Parse excluded path patterns if they are present in the config.
@@ -150,6 +152,8 @@ function parseTartufoConfig() {
 
       excludedPathPatterns.push(s);
     });
+  } else {
+    excludedPathPatterns = [];
   }
 }
 
