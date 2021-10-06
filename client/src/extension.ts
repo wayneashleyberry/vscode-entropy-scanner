@@ -125,6 +125,10 @@ function excludeSignature(signature: string, filename: string) {
         ] = `${filename}: <Reason for exclusion>`;
       }
 
+      if (!data.tool.tartufo["exclude-entropy-patterns"]) {
+        data.tool.tartufo["exclude-entropy-patterns"] = [];
+      }
+
       vscode.window.showTextDocument(document, 2, false).then((editor) => {
         editor.edit((edit) => {
           const firstLine = editor.document.lineAt(0);
