@@ -2,7 +2,7 @@
   "name": "entropy-scanner-client",
   "description": "Entropy scanner client",
   "author": "Wayne Ashley Berry",
-  "version": "1.4.0",
+  "version": "1.5.0",
   "repository": {
     "type": "git",
     "url": "https://github.com/wayneashleyberry/vscode-entropy-scanner"
