@@ -254,6 +254,8 @@ async function validateTextDocument(textDocument: TextDocument): Promise<void> {
 
   const findings = scanner.findEntropy(text);
 
+  const lines = textDocument.getText().split("\n");
+
   findings.forEach((finding) => {
     const diagnostic: Diagnostic = {
       severity: DiagnosticSeverity.Warning,
@@ -307,9 +309,17 @@ async function validateTextDocument(textDocument: TextDocument): Promise<void> {
           continue;
         }
 
+        // We need to grab the entire line for pattern matching as of tartufo 2.8.1
+
+        const lineNumber = textDocument.positionAt(finding.index).line;
+
+        if (!lines[lineNumber]) {
+          continue;
+        }
+
         const signaturePattern = excludedEntropyPatterns[filenamePattern];
         const signatureRe = new RegExp(signaturePattern);
-        const signaturePatternMatch = signatureRe.test(finding.text);
+        const signaturePatternMatch = signatureRe.test(lines[lineNumber]);
 
         if (signaturePatternMatch) {
           ignoreFindingBasedOnEntropyPattern = true;
