@@ -24,9 +24,14 @@ const tartufoExcludeSignaturesKey = "exclude-signatures";
 const tartufoExcludePathPatternsKey = "exclude-path-patterns";
 const tartufoExcludeEntropyPatterns = "exclude-entropy-patterns";
 
+interface excludedEntropyPattern {
+  path_pattern: string;
+  pattern: string;
+}
+
 let excludedSignatures: Array<string> = [];
 let excludedPathPatterns: Array<string> = [];
-let excludedEntropyPatterns: Record<string, string> = {};
+let excludedEntropyPatterns: Array<excludedEntropyPattern> = [];
 
 // Create a connection for the server, using Node's IPC as a transport.
 // Also include all preview / proposed LSP features.
@@ -164,34 +169,46 @@ function parseTartufoConfig() {
     data.tool.tartufo &&
     data.tool.tartufo[tartufoExcludeEntropyPatterns]
   ) {
-    const patterns: Array<string> =
-      data.tool.tartufo[tartufoExcludeEntropyPatterns];
+    const patterns: Array<excludedEntropyPattern> = [];
+
+    data.tool.tartufo[tartufoExcludeEntropyPatterns].forEach((obj: any) => {
+      // legacy data format
+      if (typeof obj === "string") {
+        const parts = obj.split("::");
+
+        patterns.push({
+          path_pattern: parts[0],
+          pattern: parts[1],
+        });
+      }
+
+      // modern data format
+      if (obj["path-pattern"] && obj.pattern) {
+        patterns.push({
+          path_pattern: obj["path-pattern"],
+          pattern: obj.pattern,
+        });
+      }
+    });
 
     connection.console.log(
       new Date() + " " + "clearing excluded entropy patterns"
     );
 
-    excludedEntropyPatterns = {};
+    excludedEntropyPatterns = patterns;
 
     patterns.forEach((s) => {
-      if (typeof s !== "string") {
-        return;
-      }
-
       connection.console.log(
-        new Date() + " " + "excluding entropy pattern: " + s
+        new Date() +
+          " " +
+          "excluding entropy pattern: " +
+          s.path_pattern +
+          "::" +
+          s.pattern
       );
-
-      const parts = s.split("::");
-
-      if (parts.length !== 2) {
-        return;
-      }
-
-      excludedEntropyPatterns[parts[0]] = parts[1];
     });
   } else {
-    excludedEntropyPatterns = {};
+    excludedEntropyPatterns = [];
   }
 }
 
@@ -305,32 +322,36 @@ async function validateTextDocument(textDocument: TextDocument): Promise<void> {
     let ignoreFindingBasedOnEntropyPattern = false;
 
     if (workspaceFolder && filename !== "") {
-      for (const filenamePattern in excludedEntropyPatterns) {
-        const filenameRe = new RegExp(filenamePattern);
+      excludedEntropyPatterns.forEach((e) => {
+        const filenameRe = new RegExp(e.path_pattern);
         const filenamePatternMatch = filenameRe.test(filename);
 
         if (!filenamePatternMatch) {
-          continue;
+          return;
         }
 
         // We need to grab the entire line for pattern matching as of tartufo 2.8.1
         // This logic was reverted in 2.9, but is going to be added back as an optional feature in 3.0.
 
         // const lineNumber = textDocument.positionAt(finding.index).line;
+        // if (!lines[lineNumber]) {
+        //   return;
+        // }
 
+        // const signaturePatternMatch = signatureRe.test(lines[lineNumber]);
         // if (!lines[lineNumber]) {
         //   continue;
         // }
-
-        const signaturePattern = excludedEntropyPatterns[filenamePattern];
-        const signatureRe = new RegExp(signaturePattern);
-        const signaturePatternMatch = signatureRe.test(finding.text);
+        //
         // const signaturePatternMatch = signatureRe.test(lines[lineNumber]);
+
+        const signatureRe = new RegExp(e.pattern);
+        const signaturePatternMatch = signatureRe.test(finding.text);
 
         if (signaturePatternMatch) {
           ignoreFindingBasedOnEntropyPattern = true;
         }
-      }
+      });
     }
 
     if (ignoreFindingBasedOnEntropyPattern) {
