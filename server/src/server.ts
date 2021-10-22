@@ -174,6 +174,10 @@ function parseTartufoConfig() {
     excludedEntropyPatterns = {};
 
     patterns.forEach((s) => {
+      if (typeof s !== "string") {
+        return;
+      }
+
       connection.console.log(
         new Date() + " " + "excluding entropy pattern: " + s
       );
