@@ -324,7 +324,7 @@ async function validateTextDocument(textDocument: TextDocument): Promise<void> {
 
         const signaturePattern = excludedEntropyPatterns[filenamePattern];
         const signatureRe = new RegExp(signaturePattern);
-        const signaturePatternMatch = signatureRe.test(finding.reason);
+        const signaturePatternMatch = signatureRe.test(finding.text);
         // const signaturePatternMatch = signatureRe.test(lines[lineNumber]);
 
         if (signaturePatternMatch) {
