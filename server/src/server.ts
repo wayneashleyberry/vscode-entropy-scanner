@@ -172,10 +172,23 @@ function parseTartufoConfig() {
     const patterns: Array<excludedEntropyPattern> = [];
 
     data.tool.tartufo[tartufoExcludeEntropyPatterns].forEach((obj: any) => {
-      patterns.push({
-        path_pattern: obj["path-pattern"],
-        pattern: obj.pattern,
-      });
+      // legacy data format
+      if (typeof obj === "string") {
+        const parts = obj.split("::");
+
+        patterns.push({
+          path_pattern: parts[0],
+          pattern: parts[1],
+        });
+      }
+
+      // modern data format
+      if (obj["path-pattern"] && obj.pattern) {
+        patterns.push({
+          path_pattern: obj["path-pattern"],
+          pattern: obj.pattern,
+        });
+      }
     });
 
     connection.console.log(
