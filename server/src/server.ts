@@ -318,15 +318,22 @@ async function validateTextDocument(textDocument: TextDocument): Promise<void> {
         }
 
         // We need to grab the entire line for pattern matching as of tartufo 2.8.1
+        // This logic was reverted in 2.9, but is going to be added back as an optional feature in 3.0.
 
-        const lineNumber = textDocument.positionAt(finding.index).line;
+        // const lineNumber = textDocument.positionAt(finding.index).line;
+        // if (!lines[lineNumber]) {
+        //   return;
+        // }
 
-        if (!lines[lineNumber]) {
-          return;
-        }
+        // const signaturePatternMatch = signatureRe.test(lines[lineNumber]);
+        // if (!lines[lineNumber]) {
+        //   continue;
+        // }
+        //
+        // const signaturePatternMatch = signatureRe.test(lines[lineNumber]);
 
         const signatureRe = new RegExp(e.pattern);
-        const signaturePatternMatch = signatureRe.test(lines[lineNumber]);
+        const signaturePatternMatch = signatureRe.test(finding.text);
 
         if (signaturePatternMatch) {
           ignoreFindingBasedOnEntropyPattern = true;
