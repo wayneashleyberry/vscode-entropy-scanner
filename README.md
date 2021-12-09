@@ -20,3 +20,7 @@ _Features_
 - Highlight high entropy strings using Visual Studio Code diagnostics
 - Provides quick actions for excluding specific signatures
 - Respects the `exclude-signatures`, `exclude-path-patterns` and `exclude-entropy-patterns` options from your `tartufo.toml`
+
+_Known issues_
+
+- This extension will nuke any comments in your `tartufo.toml` file when making changes, I haven't found a JavaScript TOML parser that does otherwise. Suggestions welcome!
