@@ -18,5 +18,5 @@ High entropy strings may contain passwords, authentication tokens or private key
 _Features_
 
 - Highlight high entropy strings using Visual Studio Code diagnostics
-- Provices quick actions for excluding specific signatures
+- Provides quick actions for excluding specific signatures
 - Respects the `exclude-signatures`, `exclude-path-patterns` and `exclude-entropy-patterns` options from your `tartufo.toml`
