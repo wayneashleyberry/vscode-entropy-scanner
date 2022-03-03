@@ -1,0 +1,7 @@
+[tool.tartufo]
+exclude-path-patterns = [
+	{ path-pattern = 'tartufo.toml', reason = '...' },
+	{ path-pattern = 'package-lock.json', reason = '...' },
+	{ path-pattern = 'server/package-lock.json', reason = '...' },
+	{ path-pattern = 'client/package-lock.json', reason = '...' },
+]
